@@ -15,6 +15,30 @@
                 "shadcn@latest",
                 "mcp"
             ]
+        },
+        "frappe-docs": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@nicepkg/aide-docs-mcp"
+            ],
+            "env": {
+                "DOCS_BASE_URL": "https://frappeframework.com/docs",
+                "DOCS_VERSION": "v15"
+            },
+            "_comment": "Frappe Framework documentation server. Provides on-demand access to Frappe API docs, DocType reference, Bench CLI, and Jinja templating. Replace with official Frappe MCP when available."
+        },
+        "fhir-docs": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@nicepkg/aide-docs-mcp"
+            ],
+            "env": {
+                "DOCS_BASE_URL": "https://hl7.org/fhir/R4",
+                "DOCS_VERSION": "R4"
+            },
+            "_comment": "HL7 FHIR R4 specification reference. Use for resource definitions, data types, and search parameters."
         }
         //other mcp servers
     }

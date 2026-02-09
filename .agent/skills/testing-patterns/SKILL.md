@@ -175,4 +175,124 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash
 
 ---
 
+---
+
+## 11. Frappe Test Patterns
+
+### Test Runner
+
+Frappe uses Python `unittest` with its own test runner via Bench CLI:
+
+```bash
+# All tests for an app
+bench --site mysite.localhost run-tests --app my_ehealth
+
+# Single DocType
+bench --site mysite.localhost run-tests --doctype "Patient"
+
+# Single module
+bench --site mysite.localhost run-tests --module my_ehealth.my_ehealth.doctype.patient.test_patient
+
+# Verbose
+bench --site mysite.localhost run-tests --app my_ehealth -v
+```
+
+### Test File Location
+
+Each DocType has a test file at:
+```
+my_ehealth/my_ehealth/doctype/<doctype_name>/test_<doctype_name>.py
+```
+
+### Frappe Test Utilities
+
+| Utility | Purpose |
+|---------|---------|
+| `frappe.tests.utils.FrappeTestCase` | Base class — handles setup, teardown, DB rollback |
+| `frappe.get_doc(...)` | Create/fetch documents in tests |
+| `frappe.mock("method")` | Patch Frappe methods |
+| `self.assertRaises(...)` | Assert validation errors |
+| `frappe.set_user("user@example.com")` | Test as specific user/role |
+| `frappe.flags.in_test = True` | Auto-set by runner; skip side effects |
+
+### Example: DocType Unit Test
+
+```python
+import frappe
+from frappe.tests.utils import FrappeTestCase
+
+class TestPatient(FrappeTestCase):
+    def setUp(self):
+        self.patient = frappe.get_doc({
+            "doctype": "Patient",
+            "first_name": "Test",
+            "last_name": "Patient",
+            "sex": "Male",
+            "dob": "1990-01-01"
+        }).insert(ignore_permissions=True)
+
+    def test_patient_creation(self):
+        self.assertTrue(self.patient.name)
+        self.assertEqual(self.patient.patient_name, "Test Patient")
+
+    def test_duplicate_uid_rejected(self):
+        self.patient.uid = "ID-12345"
+        self.patient.save()
+        duplicate = frappe.get_doc({
+            "doctype": "Patient",
+            "first_name": "Dup",
+            "sex": "Female",
+            "uid": "ID-12345"
+        })
+        self.assertRaises(frappe.DuplicateEntryError, duplicate.insert)
+
+    def test_role_based_access(self):
+        frappe.set_user("receptionist@example.com")
+        # Receptionist can read Patient
+        patient = frappe.get_doc("Patient", self.patient.name)
+        self.assertTrue(patient.name)
+
+    def tearDown(self):
+        frappe.set_user("Administrator")
+        frappe.delete_doc("Patient", self.patient.name, force=True)
+```
+
+### Testing Workflows and Submissions
+
+```python
+def test_encounter_submit_creates_medical_record(self):
+    encounter = frappe.get_doc({
+        "doctype": "Patient Encounter",
+        "patient": self.patient.name,
+        "practitioner": self.practitioner.name,
+        "encounter_date": frappe.utils.today()
+    }).insert()
+    encounter.submit()
+    # Verify downstream effect
+    records = frappe.get_all("Medical Record", filters={"reference_name": encounter.name})
+    self.assertTrue(len(records) > 0)
+```
+
+### Testing Whitelisted APIs
+
+```python
+def test_whitelist_api(self):
+    from my_ehealth.api.encounter import get_patient_history
+    frappe.set_user("doctor@example.com")
+    result = get_patient_history(patient=self.patient.name)
+    self.assertIsInstance(result, list)
+```
+
+### Frappe Test Best Practices
+
+| Practice | Why |
+|----------|-----|
+| Inherit `FrappeTestCase` | Auto DB rollback per test |
+| Use `ignore_permissions=True` in setUp | Isolate permission tests from data setup |
+| Call `frappe.set_user("Administrator")` in tearDown | Reset user context |
+| Never hardcode document names | Use variables from setUp |
+| Test controller hooks (validate, on_submit) | These contain business rules |
+| Test RBAC with `frappe.set_user()` | Verify role-based access |
+| Avoid testing Frappe core | Only test your app logic |
+
 > **Remember:** Tests are documentation. If someone can't understand what the code does from the tests, rewrite them.

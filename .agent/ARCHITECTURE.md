@@ -10,7 +10,7 @@ Antigravity Kit is a modular system consisting of:
 
 - **20 Specialist Agents** - Role-based AI personas
 - **38 Skills** - Domain-specific knowledge modules
-- **11 Workflows** - Slash command procedures
+- **12 Workflows** - Slash command procedures
 
 ---
 
@@ -41,10 +41,10 @@ Specialist AI personas for different domains.
 | `database-architect`     | Schema, SQL                | database-design, prisma-expert, frappe-development       |
 | `mobile-developer`       | iOS, Android, RN           | mobile-design                                            |
 | `game-developer`         | Game logic, mechanics      | game-development                                         |
-| `devops-engineer`        | CI/CD, Docker              | deployment-procedures, docker-expert                     |
+| `devops-engineer`        | CI/CD, Docker, Frappe      | deployment-procedures, docker-expert, frappe-development  |
 | `security-auditor`       | Security compliance        | vulnerability-scanner, red-team-tactics, healthcare-compliance |
 | `penetration-tester`     | Offensive security         | red-team-tactics                                         |
-| `test-engineer`          | Testing strategies         | testing-patterns, tdd-workflow, webapp-testing           |
+| `test-engineer`          | Testing strategies         | testing-patterns, tdd-workflow, webapp-testing, frappe-development |
 | `debugger`               | Root cause analysis        | systematic-debugging                                     |
 | `performance-optimizer`  | Speed, Web Vitals          | performance-profiling                                    |
 | `seo-specialist`         | Ranking, visibility        | seo-fundamentals, geo-fundamentals                       |
@@ -117,13 +117,13 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 | ----------------------- | ------------------------ |
 | `vulnerability-scanner` | Security auditing, OWASP |
 | `red-team-tactics`      | Offensive security       |
-| `healthcare-compliance` | HIPAA, HL7, FHIR, PHI guardrails |
+| `healthcare-compliance` | HIPAA, HL7, FHIR, PHI guardrails, FHIR mappings |
 
 ### Frappe / Healthcare
 
 | Skill                   | Description                                    |
 | ----------------------- | ---------------------------------------------- |
-| `frappe-development`    | Frappe Framework architecture, DocTypes, hooks  |
+| `frappe-development`    | Frappe Framework architecture, DocTypes, hooks, ERPNext Healthcare module reference |
 
 ### Architecture & Planning
 
@@ -175,12 +175,13 @@ Modular knowledge domains that agents can load on-demand. based on task context.
 
 ---
 
-## 🔄 Workflows (11)
+## 🔄 Workflows (12)
 
 Slash command procedures. Invoke with `/command`.
 
 | Command          | Description              |
 | ---------------- | ------------------------ |
+| `/bench`         | Frappe Bench operations  |
 | `/brainstorm`    | Socratic discovery       |
 | `/create`        | Create new features      |
 | `/debug`         | Debug issues             |
@@ -275,7 +276,7 @@ For details, see [scripts/README.md](scripts/README.md)
 | ------------------- | ----------------------------- |
 | **Total Agents**    | 20                            |
 | **Total Skills**    | 38                            |
-| **Total Workflows** | 11                            |
+| **Total Workflows** | 12                            |
 | **Total Scripts**   | 2 (master) + 18 (skill-level) |
 | **Coverage**        | ~90% web/mobile development   |
 
@@ -290,7 +291,10 @@ For details, see [scripts/README.md](scripts/README.md)
 | Mobile   | `mobile-developer`    | mobile-design                         |
 | Database | `database-architect`  | database-design, prisma-expert        |
 | Security | `security-auditor`    | vulnerability-scanner                 |
-| Testing  | `test-engineer`       | testing-patterns, webapp-testing      |
+| Testing  | `test-engineer`       | testing-patterns, webapp-testing, frappe-development |
 | Debug    | `debugger`            | systematic-debugging                  |
 | Plan     | `project-planner`     | brainstorming, plan-writing           |
 | Healthcare | `backend-specialist` + `security-auditor` | frappe-development, healthcare-compliance |
+| Frappe Deploy | `devops-engineer` | deployment-procedures, frappe-development |
+| Frappe Bench | `/bench` workflow | frappe-development |
+| FHIR Integration | `backend-specialist` | healthcare-compliance (FHIR-MAPPINGS.md) |

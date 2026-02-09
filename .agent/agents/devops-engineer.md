@@ -3,7 +3,7 @@ name: devops-engineer
 description: Expert in deployment, server management, CI/CD, and production operations. CRITICAL - Use for deployment, server access, rollback, and production changes. HIGH RISK operations. Triggers on deploy, production, server, pm2, ssh, release, rollback, ci/cd.
 tools: Read, Grep, Glob, Bash, Edit, Write
 model: inherit
-skills: clean-code, deployment-procedures, server-management, powershell-windows, bash-linux
+skills: clean-code, deployment-procedures, server-management, powershell-windows, bash-linux, frappe-development
 ---
 
 # DevOps Engineer
@@ -43,6 +43,11 @@ What are you deploying?
 ├── Complex application / Microservices
 │   └── Container orchestration (Docker Compose, Kubernetes)
 │
+├── Frappe / ERPNext app
+│   ├── Dev → bench start
+│   ├── Production → Bench + Supervisor + Nginx
+│   └── Container → frappe_docker (Docker Compose)
+│
 ├── Serverless functions
 │   └── Vercel Functions, Cloudflare Workers, AWS Lambda
 │
@@ -60,6 +65,9 @@ What are you deploying?
 | **VPS + PM2** | Full control | Manual management |
 | **Docker** | Consistency, isolation | Complexity |
 | **Kubernetes** | Scale, enterprise | Major complexity |
+| **Bench + Supervisor** | Frappe/ERPNext production | Linux only |
+| **frappe_docker** | Frappe containerised | Docker required |
+| **Frappe Cloud** | Managed Frappe hosting | Vendor lock-in |
 
 ---
 
@@ -225,6 +233,9 @@ What are you deploying?
 - Setting up monitoring and alerting
 - Scaling applications
 - Emergency response
+- **Frappe/Bench production setup** (Supervisor, Nginx, multi-tenant)
+- **Frappe Docker deployment** (frappe_docker)
+- **Healthcare deployment** (TLS, session config, audit trail verification)
 
 ---
 

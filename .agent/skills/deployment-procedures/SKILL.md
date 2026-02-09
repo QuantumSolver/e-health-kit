@@ -238,4 +238,128 @@ Before deploying:
 
 ---
 
+---
+
+## 11. Frappe / Bench Deployment
+
+### Platform Selection for Frappe
+
+| Scenario | Recommendation |
+|----------|---------------|
+| Development | `bench start` (Werkzeug + Redis + Scheduler) |
+| Single-server production | Bench + Supervisor + Nginx |
+| Containerised | Official frappe_docker (Docker Compose) |
+| Multi-tenant | DNS multitenant with Nginx routing |
+| Cloud managed | Frappe Cloud (managed hosting) |
+
+### Production Setup (Single Server)
+
+```bash
+# 1. Setup production config (creates Supervisor + Nginx configs)
+sudo bench setup production <linux_user>
+
+# 2. Generate and enable Nginx config
+bench setup nginx
+sudo ln -s /etc/nginx/conf.d/frappe-bench.conf /etc/nginx/sites-enabled/
+sudo nginx -t && sudo service nginx reload
+
+# 3. Enable scheduler
+bench enable-scheduler
+
+# 4. Restart everything
+sudo supervisorctl restart all
+```
+
+### Deployment Workflow (Code Update)
+
+```bash
+# 1. Backup before deploy
+bench --site mysite.localhost backup --with-files
+
+# 2. Pull latest code
+bench update --pull --reset
+
+# 3. Or for specific app only
+cd apps/my_ehealth && git pull origin main && cd ../..
+
+# 4. Run migrations
+bench --site mysite.localhost migrate
+
+# 5. Build assets
+bench build --app my_ehealth
+
+# 6. Clear cache
+bench --site mysite.localhost clear-cache
+
+# 7. Restart
+sudo supervisorctl restart all
+```
+
+### Docker Deployment (frappe_docker)
+
+```bash
+# Clone official Docker setup
+git clone https://github.com/frappe/frappe_docker.git
+cd frappe_docker
+
+# Production with custom app
+export CUSTOM_APP_REPO=https://github.com/org/my_ehealth.git
+docker compose -f compose.yaml up -d
+```
+
+### Pre-Deployment Checklist (Frappe)
+
+- [ ] `bench --site mysite.localhost run-tests --app my_ehealth` passes
+- [ ] `bench build` succeeds without errors
+- [ ] Database backup taken (`bench backup --with-files`)
+- [ ] DocType JSON changes committed (no uncommitted schema changes)
+- [ ] `hooks.py` changes reviewed (scheduler_events, doc_events)
+- [ ] Custom Fields exported to fixtures
+- [ ] Environment config (site_config.json) has no secrets in Git
+- [ ] Redis and MariaDB/PostgreSQL services healthy
+
+### Post-Deployment Verification (Frappe)
+
+| Check | Command / Action |
+|-------|-----------------|
+| Site loads | `curl -I https://mysite.com` |
+| Scheduler running | `bench doctor` |
+| Workers alive | `sudo supervisorctl status` |
+| No migration errors | Check `bench migrate` output |
+| Error log clean | Frappe Desk → Error Log |
+| Background jobs | Frappe Desk → Background Jobs |
+
+### Rollback (Frappe)
+
+```bash
+# 1. Restore code
+cd apps/my_ehealth && git checkout <previous_tag> && cd ../..
+
+# 2. Restore database
+bench --site mysite.localhost restore /path/to/backup.sql.gz
+
+# 3. Migrate and rebuild
+bench --site mysite.localhost migrate
+bench build
+sudo supervisorctl restart all
+```
+
+### Multi-Tenant Deployment
+
+```bash
+bench config dns_multitenant on
+bench new-site tenant2.example.com
+bench --site tenant2.example.com install-app my_ehealth
+bench setup nginx
+sudo service nginx reload
+```
+
+### Healthcare-Specific Deployment Notes
+
+- Ensure TLS 1.2+ is configured in Nginx for all sites handling PHI.
+- Set `session_expiry` in site_config.json (e.g., "04:00:00" for 4 hours, or shorter for clinical workstations).
+- Enable `deny_multiple_sessions` if required by compliance policy.
+- Verify audit trail (Version DocType) is enabled for all healthcare DocTypes before go-live.
+- Test backup restore procedure with PHI data to confirm encryption and integrity.
+
 > **Remember:** Every deployment is a risk. Minimize risk through preparation, not speed.

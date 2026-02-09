@@ -107,17 +107,32 @@ From `healthcare-compliance` skill § 7:
 
 | Skill | Path | When to Read |
 |-------|------|--------------|
-| frappe-development | `.agent/skills/frappe-development/SKILL.md` | Any Frappe project |
+| frappe-development | `.agent/skills/frappe-development/SKILL.md` | Any Frappe project (includes ERPNext Healthcare module reference) |
 | healthcare-compliance | `.agent/skills/healthcare-compliance/SKILL.md` | Any PHI-handling feature |
+| FHIR mappings | `.agent/skills/healthcare-compliance/FHIR-MAPPINGS.md` | FHIR/HL7 integration work |
 | app-builder (frappe-app template) | `.agent/skills/app-builder/templates/frappe-app/TEMPLATE.md` | Scaffolding a new Frappe healthcare app |
 | frontend-design § 11 | `.agent/skills/frontend-design/SKILL.md` (Section 11) | Healthcare UI patterns & accessibility |
+| testing-patterns § 11 | `.agent/skills/testing-patterns/SKILL.md` (Section 11) | Frappe test patterns (FrappeTestCase, bench run-tests) |
+| deployment-procedures § 11 | `.agent/skills/deployment-procedures/SKILL.md` (Section 11) | Frappe/Bench production deployment |
+
+---
+
+## Workflows
+
+| Workflow | When to Use |
+|----------|-------------|
+| `/bench` | Frappe Bench operations — setup, migrate, build, test, deploy, backup |
+| `/deploy` | Production deployment (includes Frappe section) |
+| `/test` | Run tests (Frappe: `bench run-tests`) |
 
 ---
 
 ## Files Changed in This Adaptation
 
-**New (3):** `frappe-development/SKILL.md`, `healthcare-compliance/SKILL.md`, `frappe-app/TEMPLATE.md`
-**Agents updated (6):** backend-specialist, database-architect, frontend-specialist, security-auditor, product-manager, project-planner
-**Skills updated (1):** frontend-design (Section 11 added)
+**New (5):** `frappe-development/SKILL.md`, `healthcare-compliance/SKILL.md`, `healthcare-compliance/FHIR-MAPPINGS.md`, `frappe-app/TEMPLATE.md`, `workflows/bench.md`
+**Agents updated (8):** backend-specialist, database-architect, frontend-specialist, security-auditor, product-manager, project-planner, test-engineer, devops-engineer
+**Skills updated (3):** frontend-design (Section 11), testing-patterns (Section 11 — Frappe), deployment-procedures (Section 11 — Frappe)
+**Workflows updated (1):** deploy.md (Frappe section added)
+**Config updated (1):** mcp_config.json (frappe-docs, fhir-docs MCP servers)
 **Architecture updated (1):** ARCHITECTURE.md (counts, mappings, quick ref)
 

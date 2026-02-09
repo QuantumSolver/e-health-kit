@@ -115,3 +115,77 @@ When building Frappe-based healthcare systems:
 
 Always design with clinical safety, traceability, and operator ergonomics in mind, not only developer convenience.
 
+---
+
+## 7. ERPNext Healthcare Module Reference
+
+When building on top of the existing ERPNext Healthcare module (rather than greenfield), these are the standard DocTypes you inherit and extend.
+
+### Core Healthcare DocTypes (ERPNext Healthcare)
+
+| DocType | Purpose | Key Fields |
+|---------|---------|------------|
+| Patient | Master patient record | patient_name, sex, dob, blood_group, mobile, email, uid (national ID), status, territory |
+| Patient Appointment | Scheduled visit | patient, practitioner, appointment_type, appointment_date, appointment_time, department, status, duration |
+| Patient Encounter | Clinical visit note | patient, practitioner, encounter_date, symptoms (child table), diagnosis (child table), drug_prescription (child table), lab_test_prescription (child table) |
+| Vital Signs | Structured vitals | patient, signs_date, temperature, pulse, respiratory_rate, bp_systolic, bp_diastolic, bmi, height, weight, oxygen_saturation |
+| Lab Test | Diagnostic test | patient, practitioner, lab_test_name, template, result_date, normal_test_items (child table), descriptive_test_items (child table), status |
+| Lab Test Template | Test definition | lab_test_name, lab_test_group, lab_test_template_type, normal_test_templates (child table), descriptive_test_templates (child table) |
+| Clinical Procedure | Procedures | patient, practitioner, procedure_template, start_date, status, consume_stock |
+| Clinical Procedure Template | Procedure definition | template, medical_department, description, rate |
+| Prescription Dosage | Dosage presets | dosage, dosage_strength (child table) |
+| Healthcare Practitioner | Clinician record | practitioner_name, department, designation, op_consulting_charge, employee (link) |
+| Healthcare Service Unit | Facility rooms/beds | service_unit_type, warehouse, company, is_group, parent_healthcare_service_unit |
+| Medical Code Standard | Coding system | medical_code_standard (ICD-10, SNOMED, LOINC) |
+| Medical Code | Individual code | medical_code, code, description |
+| Therapy Type | Rehab/therapy | therapy_type, default_duration, rate, exercises (child table) |
+| Therapy Plan | Treatment plan | patient, start_date, therapy_plan_details (child table) |
+| Inpatient Record | Admission record | patient, admitted_datetime, discharge_datetime, primary_practitioner, admission_service_unit |
+
+### Extending Healthcare DocTypes with Custom Fields
+
+When you need to add fields to standard Healthcare DocTypes without forking the module:
+
+- Use Custom Fields via Setup > Customize > Custom Field or programmatically in your app's fixtures.
+- Use fixtures in hooks.py to export and version-control Custom Fields:
+
+```python
+# hooks.py
+fixtures = [
+    {
+        "dt": "Custom Field",
+        "filters": [["module", "=", "My EHealth"]]
+    }
+]
+```
+
+- Use Custom Scripts (Client Script DocType) for UI-side behaviour on standard forms.
+- Use doc_events in hooks.py to attach server logic to standard Healthcare DocTypes without modifying their controllers:
+
+```python
+doc_events = {
+    "Patient Encounter": {
+        "validate": "my_ehealth.overrides.encounter.custom_validate",
+        "on_submit": "my_ehealth.overrides.encounter.on_submit"
+    }
+}
+```
+
+### Naming Conventions in Healthcare
+
+| DocType | Default Naming | Override |
+|---------|---------------|----------|
+| Patient | PAT-.#####  | Naming Series or field-based |
+| Patient Appointment | HLC-APP-.YYYY.-.##### | Naming Series |
+| Patient Encounter | HLC-ENC-.YYYY.-.##### | Naming Series |
+| Lab Test | HLC-LAB-.YYYY.-.##### | Naming Series |
+| Vital Signs | HLC-VIT-.YYYY.-.##### | Naming Series |
+
+### Common Extension Patterns
+
+- Add insurance fields to Patient via Custom Fields (insurance_provider, policy_number, expiry_date).
+- Add triage_level Select field to Patient Encounter for emergency department workflows.
+- Create custom child tables for structured data not covered by standard DocTypes (e.g., Allergy child table on Patient).
+- Override print formats for prescriptions, lab reports, and discharge summaries using custom Jinja templates.
+- Add Workflow states to Patient Encounter for multi-step approval (Draft → In Progress → Completed → Billed).
+

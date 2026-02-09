@@ -162,6 +162,67 @@ Run `/deploy rollback` if needed.
 | Railway | `railway up` | Needs Railway CLI |
 | Fly.io | `fly deploy` | Needs flyctl |
 | Docker | `docker compose up -d` | For self-hosted |
+| Frappe/Bench | `bench update --pull --reset` | See Frappe section below |
+| frappe_docker | `docker compose up -d` | Official Frappe Docker |
+
+---
+
+## Frappe / Bench Deployment
+
+### Pre-Deploy (Frappe)
+
+```markdown
+## 🩺 Frappe Pre-Deploy Checklist
+
+### Code Quality
+- [ ] Tests passing (`bench run-tests --app my_ehealth`)
+- [ ] `bench build` succeeds
+- [ ] DocType JSON changes committed
+
+### Data Safety
+- [ ] Backup taken (`bench backup --with-files`)
+- [ ] Rollback plan documented
+
+### Healthcare Compliance
+- [ ] No PHI in logs or error messages
+- [ ] TLS configured for production site
+- [ ] Audit trail enabled on clinical DocTypes
+
+### Ready to deploy? (y/n)
+```
+
+### Deploy Flow (Frappe)
+
+```bash
+# 1. Backup
+bench --site mysite.localhost backup --with-files
+
+# 2. Pull + migrate
+bench update --pull --reset
+# Or: cd apps/my_ehealth && git pull && cd ../..
+bench --site mysite.localhost migrate
+
+# 3. Build + clear
+bench build --app my_ehealth
+bench --site mysite.localhost clear-cache
+
+# 4. Restart
+sudo supervisorctl restart all
+
+# 5. Verify
+bench doctor
+curl -I https://mysite.com
+```
+
+### Rollback (Frappe)
+
+```bash
+cd apps/my_ehealth && git checkout <previous_tag> && cd ../..
+bench --site mysite.localhost restore /path/to/backup.sql.gz
+bench --site mysite.localhost migrate
+bench build
+sudo supervisorctl restart all
+```
 
 ---
 
